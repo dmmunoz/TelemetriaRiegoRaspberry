@@ -104,6 +104,6 @@ Proyecto operativo y en desarrollo continuo.
 
 Diego M. Muñoz Escañuela
 
-Comunidad de Vecinos Santa Fe
+Comunidad de Vecinos
 
 2026
