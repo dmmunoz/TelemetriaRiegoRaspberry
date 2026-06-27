@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Santa Fe - Control de Riego</title>
+<style>
+body{margin:0;background:#111827;color:white;font-family:Arial,sans-serif;overflow:hidden}
+h1{text-align:center;font-size:34px;margin:18px 0}
+.main{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 18px}
+.card{background:#263544;border-radius:18px;padding:24px;text-align:center;box-shadow:0 0 12px #000}
+.icon{font-size:54px}
+.title{font-size:26px;font-weight:bold;margin-top:8px}
+.state{font-size:38px;font-weight:bold;margin:12px 0}
+.ok{color:#22c55e}.bad{color:#ef4444}.warn{color:#facc15}.off{color:#d1d5db}
+.small{font-size:16px;color:#cbd5e1}
+.flow{font-size:42px;text-align:center;margin:6px;color:#93c5fd}
+.history{margin:18px;background:#263544;border-radius:18px;padding:16px}
+.history h2{margin:0 0 10px 0;font-size:24px}
+table{width:100%;border-collapse:collapse;font-size:16px}
+td,th{padding:7px;border-bottom:1px solid #475569;text-align:left}
+th{color:#facc15}
+.buttons{text-align:center;margin-top:8px}
+.buttons a{display:inline-block;padding:9px 12px;margin:3px;background:#475569;color:white;text-decoration:none;border-radius:8px;font-size:14px}
+.reset{background:#c0392b!important}
+.blink{animation:pulse 1s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+</style>
+</head>
+<body>
+
+<h1>COMUNIDAD SANTA FE - CONTROL DE RIEGO</h1>
+
+<div class="main">
+  <div class="card">
+    <div class="icon">💧</div>
+    <div class="title">ALJIBE / AGUA</div>
+    <div id="nivel" class="state">Cargando...</div>
+    <div id="nivel_fecha" class="small"></div>
+  </div>
+
+  <div class="card">
+    <div class="icon">🚰</div>
+    <div class="title">TRASVASE</div>
+    <div id="trasvase" class="state">Cargando...</div>
+    <div id="trasvase_fecha" class="small"></div>
+  </div>
+
+  <div class="card">
+    <div class="icon">🌱</div>
+    <div class="title">RIEGO RAIN BIRD</div>
+    <div id="riego" class="state">Cargando...</div>
+    <div id="riego_fecha" class="small"></div>
+  </div>
+
+  <div class="card">
+    <div class="icon">🛡️</div>
+    <div class="title">SEGURIDAD</div>
+    <div id="bloqueo" class="state">Cargando...</div>
+    <div id="bloqueo_fecha" class="small"></div>
+  </div>
+</div>
+
+<div class="history">
+  <h2>Últimos eventos</h2>
+  <table>
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Estado</th><th>Detalle</th></tr></thead>
+    <tbody id="eventos"></tbody>
+  </table>
+</div>
+
+<div class="buttons">
+  <a href="/test/nivel_bajo">Test nivel bajo</a>
+  <a href="/test/nivel_correcto">Test nivel correcto</a>
+  <a href="/test/riego_on">Test riego ON</a>
+  <a href="/test/riego_off">Test riego OFF</a>
+  <a class="reset" href="/reset_bloqueo">Reset bloqueo</a>
+</div>
+
+<script>
+function poner(id, texto, clase, fecha){
+  const el=document.getElementById(id);
+  el.className="state "+clase;
+  el.innerText=texto;
+  document.getElementById(id+"_fecha").innerText="Actualizado: "+fecha;
+}
+
+async function cargar(){
+  const r=await fetch("/api/estado");
+  const d=await r.json();
+  const e=d.estado;
+
+  poner("nivel",
+    e.nivel_agua.valor==="CORRECTO" ? "🟢 CORRECTO" : "🔴 NIVEL BAJO",
+    e.nivel_agua.valor==="CORRECTO" ? "ok" : "bad blink",
+    e.nivel_agua.actualizado);
+
+  poner("trasvase",
+    e.trasvase.valor==="ACTIVO" ? "🟡 ACTIVO" : "⚪ PARADO",
+    e.trasvase.valor==="ACTIVO" ? "warn blink" : "off",
+    e.trasvase.actualizado);
+
+  poner("riego",
+    e.riego.valor==="ACTIVO" ? "🟡 REGANDO" : "🟢 PARADO",
+    e.riego.valor==="ACTIVO" ? "warn blink" : "ok",
+    e.riego.actualizado);
+
+  poner("bloqueo",
+    e.bloqueo.valor==="SI" ? "🔴 BLOQUEADO" : "🟢 NORMAL",
+    e.bloqueo.valor==="SI" ? "bad blink" : "ok",
+    e.bloqueo.actualizado);
+
+  let html="";
+  d.eventos.forEach(ev=>{
+    html+=`<tr><td>${ev[0]}</td><td>${ev[1]}</td><td>${ev[2]}</td><td>${ev[3]}</td></tr>`;
+  });
+  document.getElementById("eventos").innerHTML=html;
+}
+
+cargar();
+setInterval(cargar, 2000);
+</script>
+
+</body>
+</html>
