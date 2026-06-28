@@ -9,8 +9,8 @@ from sensores_gpio import (
     parar_salida_trasvase
 )
 
-TIEMPO_CONFIRMACION_BAJO = 5
-TIEMPO_MAX_TRASVASE = 6 * 60 * 60
+from config import TIEMPO_CONFIRMACION_BAJO, TIEMPO_MAX_TRASVASE
+
 
 inicio_trasvase = None
 
