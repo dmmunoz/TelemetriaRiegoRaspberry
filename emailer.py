@@ -1,5 +1,6 @@
 import smtplib
 import socket
+
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formataddr
@@ -23,32 +24,47 @@ def hay_internet(timeout=3):
 
 
 def enviar_correo(asunto, mensaje):
-    """
-    Envía correo solo si hay conexión.
-    Si no hay Internet o falla SMTP, no bloquea el sistema.
-    Devuelve True si se envía, False si no.
-    """
 
     if not hay_internet():
-        print("Correo no enviado: sin conexión a Internet")
+        print("Sin conexión a Internet. No se envía el correo.")
         return False
 
     try:
+
         msg = MIMEMultipart()
-        msg["From"] = formataddr((EMAIL_NOMBRE_REMITENTE, EMAIL_REMITENTE))
+
+        msg["From"] = formataddr(
+            (EMAIL_NOMBRE_REMITENTE, EMAIL_REMITENTE)
+        )
+
         msg["To"] = ", ".join(EMAIL_DESTINATARIOS)
         msg["Subject"] = asunto
 
-        msg.attach(MIMEText(mensaje, "plain", "utf-8"))
+        msg.attach(
+            MIMEText(mensaje, "plain", "utf-8")
+        )
 
-        with smtplib.SMTP(SMTP_SERVIDOR, SMTP_PUERTO, timeout=10) as servidor:
+        with smtplib.SMTP(
+            SMTP_SERVIDOR,
+            SMTP_PUERTO,
+            timeout=10
+        ) as servidor:
+
+            servidor.ehlo()
             servidor.starttls()
-            servidor.login(EMAIL_REMITENTE, EMAIL_PASSWORD)
+            servidor.ehlo()
+
+            servidor.login(
+                EMAIL_REMITENTE,
+                EMAIL_PASSWORD
+            )
+
             servidor.send_message(msg)
 
-        print(f"Correo enviado: {asunto}")
+        print("Correo enviado correctamente.")
         return True
 
     except Exception as e:
-        print(f"Correo no enviado por error: {e}")
+
+        print(f"Error enviando correo: {e}")
         return False

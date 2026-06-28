@@ -1,4 +1,10 @@
 config_email.py
-database/*.db
-*.pyc
+
 __pycache__/
+*.pyc
+
+logs/
+*.log
+
+database/*.db
+database/*.sqlite

@@ -1,8 +1,11 @@
 from emailer import enviar_correo
 
-enviar_correo(
+ok = enviar_correo(
     "Prueba SantaFe Water Control",
-    "Este es un correo de prueba enviado desde la Raspberry Pi."
+    "Este es un correo de prueba."
 )
 
-print("Correo enviado")
+if ok:
+    print("OK")
+else:
+    print("ERROR")
